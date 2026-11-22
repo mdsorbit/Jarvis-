@@ -1,36 +1,57 @@
 # JARVIS — Android Voice Assistant
 
-An Android-first personal voice assistant project.
+An Android-first personal voice assistant project written in Kotlin.
 
 ## Current status
 
-**Foundation / starter screen added.** This repository is not yet a working always-listening assistant and no APK has been built or tested.
+**Stage 1 source code is in place:** Android app screen, microphone permission flow, visible microphone foreground service, and offline Porcupine wake-word detection configured for the built-in **“Jarvis”** keyword.
 
-## Planned milestones
+This source has not yet been built or tested on a physical phone. No APK is available yet.
 
-1. Android app foundation and project structure
-2. Microphone permission and clear foreground-service notification
-3. Wake-word detection
-4. Hindi speech recognition and Hindi text-to-speech
-5. Offline commands for basic phone tasks
-6. Optional online AI through a secure backend
-7. Battery/background behavior testing on real devices
+## Configure the Picovoice AccessKey
 
-## Android project
+Porcupine requires a Picovoice Console account and an AccessKey.
 
-Open this repository in Android Studio and sync the Gradle project.
+1. Create/sign in to your account at https://console.picovoice.ai/.
+2. Copy your AccessKey.
+3. In the Android project root, create a local file named `local.properties` (this file is ignored by Git).
+4. Add this line, replacing the placeholder with your own key:
+
+```properties
+PICOVOICE_ACCESS_KEY=YOUR_PICOVOICE_ACCESS_KEY
+```
+
+Do not commit or share your AccessKey. Note that a key packaged into an Android client can be extracted from an APK; production use needs a carefully managed key and service-side controls.
+
+## Build
+
+Open this repository in Android Studio, allow Gradle sync, then run the `app` configuration on a real Android phone.
 
 - Application ID: `com.mdsorbit.jarvis`
 - Minimum Android SDK: 23
-- Target Android SDK: 35
+- Compile / target SDK: 35
 - Language: Kotlin
+- Wake-word SDK: `ai.picovoice:porcupine-android:4.0.2`
 
-## Privacy and platform behavior
+## Current behavior
 
-JARVIS will use microphone access only with user permission and visible Android microphone/foreground-service indicators. Background microphone operation is subject to Android version restrictions. Sensitive actions such as calls, messages, and payments must require user confirmation.
+- The user must open JARVIS and press **START LISTENING**.
+- The app requests microphone permission and notification permission where applicable.
+- Android displays a persistent foreground-service notification and microphone indicator while listening.
+- The wake-word engine listens locally for **“Jarvis”**.
+- Press **STOP LISTENING** to stop the microphone service.
 
-Online AI credentials must not be embedded in the Android app. A secure backend proxy is planned for any production integration.
+## Next milestones
 
-## Build status
+1. Verify Gradle build and wake-word detection on the target phone.
+2. Start Hindi speech recognition after “Jarvis” is detected.
+3. Add Hindi text-to-speech responses.
+4. Add offline commands for basic phone tasks.
+5. Add optional online AI through a secure backend.
+6. Test background, screen-locked, battery and OEM restrictions.
 
-Source files are being prepared in this repository. Build and device testing are still pending.
+## Privacy and Android behavior
+
+Microphone use is permission-based and visible through Android's foreground-service notification and microphone indicator. Android versions and phone manufacturers can restrict microphone foreground services and background operation; starting the service from the visible app is intentional. Screen-locked reliability must be tested on the actual device and cannot be guaranteed by source code alone.
+
+Sensitive actions such as calls, messages, and payments must require explicit user confirmation. Online AI credentials must not be embedded in the app.
