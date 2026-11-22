@@ -36,7 +36,18 @@ class MainActivity : Activity(), RecognitionListener {
         buildScreen()
         textToSpeech = TextToSpeech(this) { result ->
             ttsReady = result == TextToSpeech.SUCCESS
-            if (ttsReady) textToSpeech?.language = Locale("hi", "IN")
+            if (ttsReady) {
+                textToSpeech?.language = Locale("hi", "IN")
+                textToSpeech?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {
+                        handler.post { if (listening) launchRecognition() }
+                    }
+                    override fun onError(utteranceId: String?) {
+                        handler.post { if (listening) launchRecognition() }
+                    }
+                })
+            }
         }
     }
 
@@ -191,15 +202,6 @@ class MainActivity : Activity(), RecognitionListener {
             statusText.text = "JARVIS RESPONDING"
             if (ttsReady) {
                 textToSpeech?.speak(reply, TextToSpeech.QUEUE_FLUSH, null, "jarvis_reply")
-                textToSpeech?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) {
-                        handler.post { if (listening) launchRecognition() }
-                    }
-                    override fun onError(utteranceId: String?) {
-                        handler.post { if (listening) launchRecognition() }
-                    }
-                })
             } else {
                 handler.postDelayed({ launchRecognition() }, 900)
             }
