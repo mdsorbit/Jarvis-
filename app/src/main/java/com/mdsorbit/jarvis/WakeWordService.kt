@@ -28,27 +28,29 @@ class WakeWordService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIFICATION_ID, buildNotification("Preparing offline wake-word detection"))
+        startForeground(NOTIFICATION_ID, buildNotification("Preparing offline JARVIS wake-word detection"))
+
+        if (porcupineManager != null) return START_NOT_STICKY
 
         if (BuildConfig.PICOVOICE_ACCESS_KEY.isBlank()) {
-            updateNotification("AccessKey missing. Listening has not started.")
+            updateNotification("Picovoice AccessKey missing. Listening has not started.")
             stopSelf()
             return START_NOT_STICKY
         }
 
         try {
             val callback = PorcupineManagerCallback { keywordIndex ->
-                Log.i(TAG, "Wake word detected: index=$keywordIndex")
-                updateNotification("Wake word detected! Open JARVIS to give a command.")
+                Log.i(TAG, "JARVIS wake word detected: index=$keywordIndex")
+                updateNotification("JARVIS detected your wake word. Voice command module is next.")
             }
 
             porcupineManager = PorcupineManager.Builder()
                 .setAccessKey(BuildConfig.PICOVOICE_ACCESS_KEY)
-                .setKeywords(arrayOf(Porcupine.BuiltInKeyword.PORCUPINE))
+                .setKeywords(arrayOf(Porcupine.BuiltInKeyword.JARVIS))
                 .build(this, callback)
 
             porcupineManager?.start()
-            updateNotification("Listening for “Porcupine” offline. Tap Stop in JARVIS to end.")
+            updateNotification("Listening for “Jarvis” offline. Tap Stop in the app to end.")
         } catch (error: PorcupineException) {
             Log.e(TAG, "Could not start Porcupine", error)
             updateNotification("Wake-word engine error. Check AccessKey and app setup.")
@@ -92,8 +94,8 @@ class WakeWordService : Service() {
     }
 
     private fun updateNotification(message: String) {
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.notify(NOTIFICATION_ID, buildNotification(message))
+        getSystemService(NotificationManager::class.java)
+            .notify(NOTIFICATION_ID, buildNotification(message))
     }
 
     override fun onDestroy() {
