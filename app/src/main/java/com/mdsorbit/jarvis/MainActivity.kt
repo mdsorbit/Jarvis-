@@ -61,7 +61,7 @@ class MainActivity : Activity() {
         }
 
         val info = TextView(this).apply {
-            text = "Wake-word engine: Porcupine (offline)\nTest wake word: PORCUPINE\n\nThe microphone runs only after you press START and grant permission. A persistent Android notification stays visible while listening.\n\nCustom “Jarvis” wake word will be added after its keyword model is supplied."
+            text = "Offline wake-word engine: Porcupine\nWake word: “Jarvis”\n\nPress START and grant microphone permission. Android will show a persistent notification and microphone indicator while listening.\n\nAfter wake-word detection, Hindi speech recognition and spoken replies will be added in the next stage."
             textSize = 14f
             setTextColor(muted)
             gravity = Gravity.CENTER
@@ -95,7 +95,7 @@ class MainActivity : Activity() {
 
     private fun requestAndStart() {
         if (BuildConfig.PICOVOICE_ACCESS_KEY.isBlank()) {
-            Toast.makeText(this, "Picovoice AccessKey is not configured yet. See README.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Picovoice AccessKey is not configured. Follow the README setup.", Toast.LENGTH_LONG).show()
             statusText.text = "ACCESS KEY REQUIRED"
             return
         }
@@ -107,10 +107,7 @@ class MainActivity : Activity() {
             needed.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        val missing = needed.filter {
-            checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
-        }
-
+        val missing = needed.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
         if (missing.isNotEmpty()) {
             requestPermissions(missing.toTypedArray(), requestPermissionsCode)
         } else {
@@ -125,7 +122,7 @@ class MainActivity : Activity() {
         } else {
             startService(intent)
         }
-        statusText.text = "STARTING WAKE-WORD ENGINE..."
+        statusText.text = "STARTING JARVIS WAKE WORD..."
     }
 
     override fun onRequestPermissionsResult(
