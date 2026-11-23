@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mdsorbit.jarvis"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
         versionCode = 4
         versionName = "0.4.0"
