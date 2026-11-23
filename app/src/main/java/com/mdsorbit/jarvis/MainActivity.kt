@@ -60,7 +60,7 @@ class MainActivity : Activity(), RecognitionListener {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(28, 48, 28, 32)
+            setPadding(dp(20), dp(32), dp(20), dp(24))
             setBackgroundColor(navy)
         }
 
@@ -83,14 +83,14 @@ class MainActivity : Activity(), RecognitionListener {
             textSize = 18f
             setTextColor(white)
             gravity = Gravity.CENTER
-            setPadding(0, 34, 0, 12)
+            setPadding(0, dp(24), 0, dp(8))
         }
         heardText = TextView(this).apply {
             text = "Your recognized speech will appear here."
             textSize = 15f
             setTextColor(muted)
             gravity = Gravity.CENTER
-            setPadding(8, 20, 8, 30)
+            setPadding(dp(8), dp(16), dp(8), dp(20))
         }
         val info = TextView(this).apply {
             text = "No Picovoice account or API key needed. Tap START and speak in Hindi. On supported Android phones, JARVIS uses the on-device speech recognizer; otherwise Android may use its configured speech service. This starter version does not listen for the custom wake word while the screen is locked."
@@ -98,7 +98,7 @@ class MainActivity : Activity(), RecognitionListener {
             setTextColor(muted)
             gravity = Gravity.CENTER
             setLineSpacing(5f, 1f)
-            setPadding(8, 8, 8, 24)
+            setPadding(dp(8), dp(8), dp(8), dp(20))
         }
         val startButton = Button(this).apply {
             text = "START VOICE ASSISTANT"
@@ -241,5 +241,11 @@ class MainActivity : Activity(), RecognitionListener {
         super.onDestroy()
     }
 
-    private fun match(width: Int, height: Int) = LinearLayout.LayoutParams(width, height)
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
+    private fun match(width: Int, height: Int): LinearLayout.LayoutParams {
+        val layoutWidth = if (width < 0) width else dp(width)
+        val layoutHeight = if (height < 0) height else dp(height)
+        return LinearLayout.LayoutParams(layoutWidth, layoutHeight)
+    }
 }
