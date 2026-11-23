@@ -46,7 +46,6 @@ class MainActivity : Activity(), RecognitionListener {
     private var listening = false
     private var ttsReady = false
     private var retryCount = 0
-    private var usingOnDeviceRecognizer = false
     private val handler = Handler(Looper.getMainLooper())
     private val micRequest = 41
     private val aiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -131,10 +130,8 @@ class MainActivity : Activity(), RecognitionListener {
             return
         }
         if (recognizer == null) {
-            usingOnDeviceRecognizer = Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(this)
-            recognizer = if (usingOnDeviceRecognizer)
-                SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
-            else SpeechRecognizer.createSpeechRecognizer(this)
+            // Use system recognizer, which can access online Hindi language services.
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this)
             recognizer?.setRecognitionListener(this)
         }
         listening = true
@@ -152,6 +149,7 @@ class MainActivity : Activity(), RecognitionListener {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, "hi-IN")
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "hi-IN")
+                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, false)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
