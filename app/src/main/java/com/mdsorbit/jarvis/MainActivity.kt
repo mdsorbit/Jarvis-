@@ -193,18 +193,7 @@ class MainActivity : Activity(), RecognitionListener {
         }
         replyView.text = message
         status.text = "VOICE ERROR $error"
-        // Error 13 means the requested language is unavailable. If the offline
-        // recognizer lacks Hindi, fall back once to Android's regular speech service.
-        if (error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE && usingOnDeviceRecognizer) {
-            try { recognizer?.destroy() } catch (_: Exception) {}
-            recognizer = SpeechRecognizer.createSpeechRecognizer(this)
-            recognizer?.setRecognitionListener(this)
-            usingOnDeviceRecognizer = false
-            retryCount = 0
-            replyView.text = "Offline Hindi voice pack unavailable. Trying Google/online speech service…"
-            listenAgain(900)
-            return
-        }
+        // The system recognizer is already used; report errors and retry normally.
         if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ||
             error == SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED ||
             error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE ||
