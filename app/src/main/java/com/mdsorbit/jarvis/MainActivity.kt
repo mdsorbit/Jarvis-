@@ -239,10 +239,10 @@ class MainActivity : Activity(), RecognitionListener {
                 if (term.isBlank()) { response = "क्या खोजना है, बताइए।"; speak(response); return }
                 openWebSearch(term); response = "$term के लिए Google खोज खोल रहा हूँ।"
             }
-            q.contains("youtube") -> { openAppOrWeb("com.google.android.youtube", "https://www.youtube.com"); response = "YouTube खोल रहा हूँ।" }
-            q.contains("chrome") -> { openAppOrWeb("com.android.chrome", "https://www.google.com"); response = "Chrome खोल रहा हूँ।" }
-            q.contains("whatsapp") -> { openAppOrWeb("com.whatsapp", "https://www.whatsapp.com"); response = "WhatsApp खोल raha हूँ।" }
-            q.contains("maps") || q.contains("मैप") -> { openAppOrWeb("com.google.android.apps.maps", "https://maps.google.com"); response = "Maps खोल रहा हूँ।" }
+            q.contains("youtube") || q.contains("यूट्यूब") || q.contains("यू ट्यूब") -> { openAppOrWeb("com.google.android.youtube", "https://www.youtube.com"); response = "YouTube खोल रहा हूँ।" }
+            q.contains("chrome") || q.contains("क्रोम") -> { openAppOrWeb("com.android.chrome", "https://www.google.com"); response = "Chrome खोल रहा हूँ।" }
+            q.contains("whatsapp") || q.contains("व्हाट्सएप") || q.contains("व्हाट्स ऐप") -> { openAppOrWeb("com.whatsapp", "https://www.whatsapp.com"); response = "WhatsApp खोल रहा हूँ।" }
+            q.contains("maps") || q.contains("मैप") || q.contains("मैप्स") || q.contains("गूगल मैप") -> { openAppOrWeb("com.google.android.apps.maps", "https://maps.google.com"); response = "Maps खोल रहा हूँ।" }
             q.contains("कॉल") || q.contains("call ") -> {
                 val who = raw.replace(Regex("(?i)कॉल करो|कॉल लगाओ|call me|call"), "").trim()
                 if (who.isBlank()) { response = "किसे कॉल करना है? Phone app खोल रहा हूँ।"; startActivity(Intent(Intent.ACTION_DIAL)) }
