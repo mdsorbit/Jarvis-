@@ -25,6 +25,16 @@ import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeBackend
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : Activity(), RecognitionListener {
     private lateinit var status: TextView
@@ -37,9 +47,14 @@ class MainActivity : Activity(), RecognitionListener {
     private var retryCount = 0
     private val handler = Handler(Looper.getMainLooper())
     private val micRequest = 41
+    private val aiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val aiModel by lazy { Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-4-hydrogen") }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        runCatching {
+            FirebaseAppCheck.getInstance().installAppCheckProviderFactory(DebugAppCheckProviderFactory.getInstance())
+        }
         buildUi()
         tts = TextToSpeech(this) { result ->
             ttsReady = result == TextToSpeech.SUCCESS
@@ -239,9 +254,33 @@ class MainActivity : Activity(), RecognitionListener {
             }
             q.contains("सेटिंग") || q.contains("settings") -> { startActivity(Intent(android.provider.Settings.ACTION_SETTINGS)); response = "Settings खोल रहा हूँ।" }
             q.contains("नमस्ते") || q.contains("हेलो") || q.contains("hello") || q.contains("jarvis") || q.contains("जार्विस") -> response = "जी, मैं सुन रहा हूँ। बताइए क्या करना है?"
-            else -> response = "मैंने सुना: $raw। इस काम के लिए online AI brain अभी connect नहीं है। Google पर खोजने के लिए कहें, Google पर खोजो और फिर अपना सवाल बोलें।"
+            else -> { askGemini(raw); return }
         }
         speak(response)
+    }
+
+    private fun askGemini(question: String) {
+        status.text = "JARVIS THINKING • GEMINI"
+        replyView.text = "आपका सवाल समझ रहा हूँ…"
+        aiScope.launch {
+            try {
+                val prompt = """
+                    You are JARVIS, a helpful personal AI assistant for an Indian user.
+                    Reply naturally in simple Hindi or Hinglish, matching the user's language.
+                    Be accurate, concise, practical, and honest. If unsure, say so.
+                    Do not claim to control phone features unless the app explicitly supports them.
+                    User message: $question
+                """.trimIndent()
+                val result = withContext(Dispatchers.IO) {
+                    aiModel.generateContent(prompt)
+                }
+                speak(result.text?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: "माफ़ कीजिए, अभी जवाब नहीं मिल पाया।")
+            } catch (e: Exception) {
+                val detail = e.localizedMessage?.take(180) ?: "Unknown error"
+                speak("Gemini से कनेक्शन नहीं हो पाया। इंटरनेट और Firebase App Check सेटिंग जाँचें। विवरण: $detail")
+            }
+        }
     }
 
     private fun openWebSearch(term: String) {
@@ -274,6 +313,7 @@ class MainActivity : Activity(), RecognitionListener {
 
     override fun onDestroy() {
         listening = false
+        aiScope.cancel()
         handler.removeCallbacksAndMessages(null)
         recognizer?.destroy()
         recognizer = null
